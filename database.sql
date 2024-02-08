@@ -174,6 +174,7 @@ CREATE TABLE IF NOT EXISTS `qualia`.`DadosEmpresa` (
   `CategoriaPadraoId` INT NOT NULL DEFAULT 1,
   `TributoPadraoId` INT NOT NULL DEFAULT 1,
   `UnidadeComercialPadraoId` INT NOT NULL DEFAULT 1,
+  `MensagensFaladas` TINYINT NOT NULL DEFAULT 1,
   PRIMARY KEY (`Id`),
   INDEX `fk_DadosEmpresa_Cep1_idx` (`CepId` ASC),
   UNIQUE INDEX `CnpjCpf_UNIQUE` (`CnpjCpf` ASC),
@@ -258,6 +259,7 @@ CREATE TABLE IF NOT EXISTS `qualia`.`Item` (
   `Combustivel` TINYINT NOT NULL DEFAULT 0,
   `EstoqueMinimo` DECIMAL(11,4) NOT NULL DEFAULT 0,
   `ConfigBancoId` INT NULL,
+  `Conferido` DECIMAL(11,4) NOT NULL DEFAULT 0,
   PRIMARY KEY (`Id`),
   UNIQUE INDEX `CodigoDeBarras_UNIQUE` (`CodigoBarras` ASC),
   INDEX `fk_Item_UnidadeComercial1_idx` (`UnidadeComercialId` ASC),
@@ -972,6 +974,37 @@ CREATE TABLE IF NOT EXISTS `qualia`.`Sangria` (
   CONSTRAINT `fk_Sangria_MovimentoCaixa1`
     FOREIGN KEY (`MovimentoCaixaId`)
     REFERENCES `qualia`.`MovimentoCaixa` (`Id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `qualia`.`Inventario`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `qualia`.`Inventario` (
+  `Id` INT NOT NULL AUTO_INCREMENT,
+  `ItemId` INT NOT NULL,
+  `Mes` INT NOT NULL,
+  `Ano` INT NOT NULL,
+  `Anterior` DECIMAL(11,4) NOT NULL DEFAULT 0,
+  `Entrada` DECIMAL(11,4) NOT NULL DEFAULT 0,
+  `Saida` DECIMAL(11,4) NOT NULL DEFAULT 0,
+  `Saldo` DECIMAL(11,4) NOT NULL DEFAULT 0,
+  `UnidadeComercialId` INT NOT NULL,
+  `ValorUnitario` DECIMAL(12,2) NOT NULL DEFAULT 0,
+  `ValorTotal` DECIMAL(12,2) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`Id`),
+  INDEX `fk_Inventario_Item1_idx` (`ItemId` ASC),
+  INDEX `fk_Inventario_UnidadeComercial1_idx` (`UnidadeComercialId` ASC),
+  CONSTRAINT `fk_Inventario_Item1`
+    FOREIGN KEY (`ItemId`)
+    REFERENCES `qualia`.`Item` (`Id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_Inventario_UnidadeComercial1`
+    FOREIGN KEY (`UnidadeComercialId`)
+    REFERENCES `qualia`.`UnidadeComercial` (`Id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
