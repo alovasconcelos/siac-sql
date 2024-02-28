@@ -77,6 +77,7 @@ CREATE TABLE IF NOT EXISTS `qualia`.`Usuario` (
   `Telefone` VARCHAR(20) NULL,
   `Ativo` TINYINT NOT NULL DEFAULT 1,
   `Adm` TINYINT NOT NULL DEFAULT 0,
+  `MensagensFaladas` TINYINT NOT NULL DEFAULT 1,
   PRIMARY KEY (`Id`),
   UNIQUE INDEX `Login_UNIQUE` (`Login` ASC))
 ENGINE = InnoDB;
@@ -174,7 +175,6 @@ CREATE TABLE IF NOT EXISTS `qualia`.`DadosEmpresa` (
   `CategoriaPadraoId` INT NOT NULL DEFAULT 1,
   `TributoPadraoId` INT NOT NULL DEFAULT 1,
   `UnidadeComercialPadraoId` INT NOT NULL DEFAULT 1,
-  `MensagensFaladas` TINYINT NOT NULL DEFAULT 1,
   PRIMARY KEY (`Id`),
   INDEX `fk_DadosEmpresa_Cep1_idx` (`CepId` ASC),
   UNIQUE INDEX `CnpjCpf_UNIQUE` (`CnpjCpf` ASC),
@@ -542,6 +542,8 @@ CREATE TABLE IF NOT EXISTS `qualia`.`MovimentoItem` (
   `Tipo` VARCHAR(1) NOT NULL,
   `CustoAnterior` DECIMAL(12,2) NOT NULL DEFAULT 0,
   `NovoCusto` DECIMAL(12,2) NOT NULL DEFAULT 0,
+  `ConferidoAnterior` DECIMAL(11,4) NOT NULL DEFAULT 0,
+  `SaldoConferido` DECIMAL(11,4) NOT NULL DEFAULT 0,
   PRIMARY KEY (`Id`),
   INDEX `fk_MovimentoItem_Item1_idx` (`ItemId` ASC),
   CONSTRAINT `fk_MovimentoItem_Item1`
@@ -671,7 +673,7 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `qualia`.`ContasAPagar` (
   `Id` INT NOT NULL AUTO_INCREMENT,
-  `DataHora` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `Data` DATE NOT NULL,
   `UsuarioId` INT NOT NULL,
   `ValorAPagar` DECIMAL(12,2) NOT NULL DEFAULT 0,
   `Parcelas` INT NOT NULL DEFAULT 1,
@@ -700,22 +702,15 @@ ENGINE = InnoDB;
 CREATE TABLE IF NOT EXISTS `qualia`.`ParcelaContasAPagar` (
   `Id` INT NOT NULL AUTO_INCREMENT,
   `ContasAPagarId` INT NOT NULL,
-  `FormaPagamentoId` INT NOT NULL,
   `Data` DATE NOT NULL,
   `ValorAPagar` DECIMAL(12,2) NOT NULL DEFAULT 0,
   `ValorPago` DECIMAL(12,2) NOT NULL DEFAULT 0,
   `Situacao` VARCHAR(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (`Id`),
   INDEX `fk_ParcelaContasAPagar_ContasAPagar1_idx` (`ContasAPagarId` ASC),
-  INDEX `fk_ParcelaContasAPagar_FormaPagamento1_idx` (`FormaPagamentoId` ASC),
   CONSTRAINT `fk_ParcelaContasAPagar_ContasAPagar1`
     FOREIGN KEY (`ContasAPagarId`)
     REFERENCES `qualia`.`ContasAPagar` (`Id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
-  CONSTRAINT `fk_ParcelaContasAPagar_FormaPagamento1`
-    FOREIGN KEY (`FormaPagamentoId`)
-    REFERENCES `qualia`.`FormaPagamento` (`Id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
@@ -1005,6 +1000,138 @@ CREATE TABLE IF NOT EXISTS `qualia`.`Inventario` (
   CONSTRAINT `fk_Inventario_UnidadeComercial1`
     FOREIGN KEY (`UnidadeComercialId`)
     REFERENCES `qualia`.`UnidadeComercial` (`Id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `qualia`.`CalendarioUsuario`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `qualia`.`CalendarioUsuario` (
+  `Id` INT NOT NULL AUTO_INCREMENT,
+  `UsuarioId` INT NOT NULL,
+  `Data` DATE NOT NULL,
+  `Titulo` VARCHAR(45) NOT NULL,
+  `Texto` TEXT NULL,
+  `Ativo` TINYINT NOT NULL DEFAULT 1,
+  PRIMARY KEY (`Id`),
+  INDEX `fk_CalendarioUsuario_Usuario1_idx` (`UsuarioId` ASC),
+  CONSTRAINT `fk_CalendarioUsuario_Usuario1`
+    FOREIGN KEY (`UsuarioId`)
+    REFERENCES `qualia`.`Usuario` (`Id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `qualia`.`PagamentoContasAPagar`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `qualia`.`PagamentoContasAPagar` (
+  `Id` INT NOT NULL AUTO_INCREMENT,
+  `Data` DATE NOT NULL,
+  `FormaPagamentoId` INT NOT NULL,
+  `Valor` DECIMAL(12,2) NOT NULL DEFAULT 0,
+  `ParcelaContasAPagarId` INT NOT NULL,
+  `UsuarioId` INT NOT NULL,
+  PRIMARY KEY (`Id`),
+  INDEX `fk_PagamentoContasAPagar_FormaPagamento1_idx` (`FormaPagamentoId` ASC),
+  INDEX `fk_PagamentoContasAPagar_ParcelaContasAPagar1_idx` (`ParcelaContasAPagarId` ASC),
+  INDEX `fk_PagamentoContasAPagar_Usuario1_idx` (`UsuarioId` ASC),
+  CONSTRAINT `fk_PagamentoContasAPagar_FormaPagamento1`
+    FOREIGN KEY (`FormaPagamentoId`)
+    REFERENCES `qualia`.`FormaPagamento` (`Id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_PagamentoContasAPagar_ParcelaContasAPagar1`
+    FOREIGN KEY (`ParcelaContasAPagarId`)
+    REFERENCES `qualia`.`ParcelaContasAPagar` (`Id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_PagamentoContasAPagar_Usuario1`
+    FOREIGN KEY (`UsuarioId`)
+    REFERENCES `qualia`.`Usuario` (`Id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `qualia`.`ContasAReceber`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `qualia`.`ContasAReceber` (
+  `Id` INT NOT NULL AUTO_INCREMENT,
+  `UsuarioId` INT NOT NULL,
+  `Data` DATE NOT NULL,
+  `ValorAReceber` DECIMAL(12,2) NOT NULL DEFAULT 0,
+  `Parcelas` INT NOT NULL DEFAULT 1,
+  `DiasEntreParcelas` INT NOT NULL,
+  `DataPrimeiraParcela` DATE NULL,
+  `VendaPagamentoId` INT NOT NULL,
+  PRIMARY KEY (`Id`),
+  INDEX `fk_ContasAReceber_Usuario1_idx` (`UsuarioId` ASC),
+  INDEX `fk_ContasAReceber_VendaPagamento1_idx` (`VendaPagamentoId` ASC),
+  CONSTRAINT `fk_ContasAReceber_Usuario1`
+    FOREIGN KEY (`UsuarioId`)
+    REFERENCES `qualia`.`Usuario` (`Id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_ContasAReceber_VendaPagamento1`
+    FOREIGN KEY (`VendaPagamentoId`)
+    REFERENCES `qualia`.`VendaPagamento` (`Id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `qualia`.`PacelaContasAReceber`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `qualia`.`PacelaContasAReceber` (
+  `Id` INT NOT NULL AUTO_INCREMENT,
+  `Data` DATE NOT NULL,
+  `ValorAReceber` DECIMAL(12,2) NOT NULL DEFAULT 0,
+  `ValorRecebido` DECIMAL(12,2) NOT NULL DEFAULT 0,
+  `Situacao` VARCHAR(1) NOT NULL DEFAULT 0,
+  `ContasAReceberId` INT NOT NULL,
+  PRIMARY KEY (`Id`),
+  INDEX `fk_PacelaContasAReceber_ContasAReceber1_idx` (`ContasAReceberId` ASC),
+  CONSTRAINT `fk_PacelaContasAReceber_ContasAReceber1`
+    FOREIGN KEY (`ContasAReceberId`)
+    REFERENCES `qualia`.`ContasAReceber` (`Id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `qualia`.`PagamentoContasAReceber`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `qualia`.`PagamentoContasAReceber` (
+  `Id` INT NOT NULL AUTO_INCREMENT,
+  `Data` DATE NOT NULL,
+  `FormaPagamentoId` INT NOT NULL,
+  `Valor` DECIMAL(12,2) NOT NULL DEFAULT 0,
+  `UsuarioId` INT NOT NULL,
+  `PacelaContasAReceberId` INT NOT NULL,
+  PRIMARY KEY (`Id`),
+  INDEX `fk_PagamentoContasAReceber_FormaPagamento1_idx` (`FormaPagamentoId` ASC),
+  INDEX `fk_PagamentoContasAReceber_Usuario1_idx` (`UsuarioId` ASC),
+  INDEX `fk_PagamentoContasAReceber_PacelaContasAReceber1_idx` (`PacelaContasAReceberId` ASC),
+  CONSTRAINT `fk_PagamentoContasAReceber_FormaPagamento1`
+    FOREIGN KEY (`FormaPagamentoId`)
+    REFERENCES `qualia`.`FormaPagamento` (`Id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_PagamentoContasAReceber_Usuario1`
+    FOREIGN KEY (`UsuarioId`)
+    REFERENCES `qualia`.`Usuario` (`Id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_PagamentoContasAReceber_PacelaContasAReceber1`
+    FOREIGN KEY (`PacelaContasAReceberId`)
+    REFERENCES `qualia`.`PacelaContasAReceber` (`Id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
