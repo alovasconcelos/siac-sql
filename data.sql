@@ -54,22 +54,24 @@ insert into Categoria (Id, Descricao) values (18, 'CERVEJAS');
 insert into Categoria (Id, Descricao) values (19, 'VINHOS');
 
 
-insert into FormaPagamento (Codigo, Descricao) VALUES ('01','Dinheiro');
-insert into FormaPagamento (Codigo, Descricao) VALUES ('02','Cheque');
-insert into FormaPagamento (Codigo, Descricao) VALUES ('03','Cartão de Crédito');
-insert into FormaPagamento (Codigo, Descricao) VALUES ('04','Cartão de Débito');
-insert into FormaPagamento (Codigo, Descricao) VALUES ('05','Crédito Loja');
-insert into FormaPagamento (Codigo, Descricao) VALUES ('10','Vale Alimentação');
-insert into FormaPagamento (Codigo, Descricao) VALUES ('11','Vale Refeição');
-insert into FormaPagamento (Codigo, Descricao) VALUES ('12','Vale Presente');
-insert into FormaPagamento (Codigo, Descricao) VALUES ('13','Vale Combustível');
-insert into FormaPagamento (Codigo, Descricao) VALUES ('15','Boleto Bancário');
-insert into FormaPagamento (Codigo, Descricao) VALUES ('16','Depósito Bancário');
-insert into FormaPagamento (Codigo, Descricao) VALUES ('17','Pagamento Instantâneo (PIX)');
-insert into FormaPagamento (Codigo, Descricao) VALUES ('18','Transferência bancária, Carteira Digital');
-insert into FormaPagamento (Codigo, Descricao) VALUES ('19','Programa de fidelidade, Cashback, Crédito Virtual');
-insert into FormaPagamento (Codigo, Descricao) VALUES ('90','Sem pagamento');
-insert into FormaPagamento (Codigo, Descricao) VALUES ('99','Outros');
+insert into FormaPagamentoNFe (Codigo, Descricao) VALUES ('01','Dinheiro');
+insert into FormaPagamentoNFe (Codigo, Descricao) VALUES ('02','Cheque');
+insert into FormaPagamentoNFe (Codigo, Descricao) VALUES ('03','Cartão de Crédito');
+insert into FormaPagamentoNFe (Codigo, Descricao) VALUES ('04','Cartão de Débito');
+insert into FormaPagamentoNFe (Codigo, Descricao) VALUES ('05','Crédito Loja');
+insert into FormaPagamentoNFe (Codigo, Descricao) VALUES ('10','Vale Alimentação');
+insert into FormaPagamentoNFe (Codigo, Descricao) VALUES ('11','Vale Refeição');
+insert into FormaPagamentoNFe (Codigo, Descricao) VALUES ('12','Vale Presente');
+insert into FormaPagamentoNFe (Codigo, Descricao) VALUES ('13','Vale Combustível');
+insert into FormaPagamentoNFe (Codigo, Descricao) VALUES ('15','Boleto Bancário');
+insert into FormaPagamentoNFe (Codigo, Descricao) VALUES ('16','Depósito Bancário');
+insert into FormaPagamentoNFe (Codigo, Descricao) VALUES ('17','Pagamento Instantâneo (PIX)');
+insert into FormaPagamentoNFe (Codigo, Descricao) VALUES ('18','Transferência bancária, Carteira Digital');
+insert into FormaPagamentoNFe (Codigo, Descricao) VALUES ('19','Programa de fidelidade, Cashback, Crédito Virtual');
+insert into FormaPagamentoNFe (Codigo, Descricao) VALUES ('90','Sem pagamento');
+insert into FormaPagamentoNFe (Codigo, Descricao) VALUES ('99','Outros');
+
+insert into FormaPagamento (Descricao) VALUES ('A VISTA');
 
 insert into Tributo (Descricao, 
                     AliquotaICMSConsumidor, 

@@ -470,14 +470,56 @@ ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
+-- Table `qualia`.`ContaFinanceira`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `qualia`.`ContaFinanceira` (
+  `Id` INT NOT NULL AUTO_INCREMENT,
+  `Descricao` VARCHAR(45) NOT NULL,
+  PRIMARY KEY (`Id`))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `qualia`.`FormaPagamentoNFe`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `qualia`.`FormaPagamentoNFe` (
+  `Id` INT NOT NULL AUTO_INCREMENT,
+  `Codigo` VARCHAR(2) NOT NULL,
+  `Descricao` VARCHAR(50) NOT NULL,
+  PRIMARY KEY (`Id`),
+  UNIQUE INDEX `Codigo_UNIQUE` (`Codigo` ASC))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
 -- Table `qualia`.`FormaPagamento`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `qualia`.`FormaPagamento` (
   `Id` INT NOT NULL AUTO_INCREMENT,
-  `Codigo` VARCHAR(2) NOT NULL,
-  `Descricao` VARCHAR(50) NULL,
-  `Orcamento` TINYINT NOT NULL DEFAULT 0,
-  PRIMARY KEY (`Id`))
+  `Descricao` VARCHAR(50) NOT NULL,
+  `Orcamento` TINYINT NOT NULL DEFAULT 1,
+  `DisponivelEm` INT NOT NULL DEFAULT 0,
+  `ContaFinanceiraId` INT NULL,
+  `TipoAcrescimo` VARCHAR(1) NOT NULL DEFAULT 'P',
+  `TipoDesconto` VARCHAR(1) NOT NULL DEFAULT 'P',
+  `Acrescimo` DECIMAL(12,2) NOT NULL DEFAULT 0,
+  `Desconto` DECIMAL(12,2) NOT NULL DEFAULT 0,
+  `Parcelas` INT NOT NULL DEFAULT 1,
+  `DiasEntreParcelas` INT NOT NULL DEFAULT 0,
+  `FormaPagamentoNFeId` INT NULL,
+  PRIMARY KEY (`Id`),
+  INDEX `fk_FormaPagamento_ContaFinanceira1_idx` (`ContaFinanceiraId` ASC),
+  INDEX `fk_FormaPagamento_FormaPagamentoNFe1_idx` (`FormaPagamentoNFeId` ASC),
+  CONSTRAINT `fk_FormaPagamento_ContaFinanceira1`
+    FOREIGN KEY (`ContaFinanceiraId`)
+    REFERENCES `qualia`.`ContaFinanceira` (`Id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_FormaPagamento_FormaPagamentoNFe1`
+    FOREIGN KEY (`FormaPagamentoNFeId`)
+    REFERENCES `qualia`.`FormaPagamentoNFe` (`Id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
 
@@ -510,7 +552,7 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `qualia`.`MovimentoCaixa` (
   `Id` INT NOT NULL AUTO_INCREMENT,
-  `Data` DATE NOT NULL,
+  `DataHora` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `UsuarioId` INT NOT NULL,
   `SaldoAnterior` DECIMAL(12,2) NOT NULL DEFAULT 0,
   `Suprimento` DECIMAL(12,2) NOT NULL DEFAULT 0,
@@ -519,6 +561,7 @@ CREATE TABLE IF NOT EXISTS `qualia`.`MovimentoCaixa` (
   `Troco` DECIMAL(12,2) NOT NULL DEFAULT 0,
   `Saldo` DECIMAL(12,2) NOT NULL DEFAULT 0,
   `Aberto` TINYINT NOT NULL DEFAULT 1,
+  `Obs` VARCHAR(45) NULL,
   PRIMARY KEY (`Id`),
   INDEX `fk_MovimentoCaixa_Usuario1_idx` (`UsuarioId` ASC),
   CONSTRAINT `fk_MovimentoCaixa_Usuario1`
@@ -1063,12 +1106,13 @@ ENGINE = InnoDB;
 CREATE TABLE IF NOT EXISTS `qualia`.`ContasAReceber` (
   `Id` INT NOT NULL AUTO_INCREMENT,
   `UsuarioId` INT NOT NULL,
-  `Data` DATE NOT NULL,
+  `DataCadastro` DATE NOT NULL,
   `ValorAReceber` DECIMAL(12,2) NOT NULL DEFAULT 0,
   `Parcelas` INT NOT NULL DEFAULT 1,
   `DiasEntreParcelas` INT NOT NULL,
   `DataPrimeiraParcela` DATE NULL,
-  `VendaPagamentoId` INT NOT NULL,
+  `VendaPagamentoId` INT NULL,
+  `Obs` VARCHAR(255) NULL,
   PRIMARY KEY (`Id`),
   INDEX `fk_ContasAReceber_Usuario1_idx` (`UsuarioId` ASC),
   INDEX `fk_ContasAReceber_VendaPagamento1_idx` (`VendaPagamentoId` ASC),
@@ -1090,7 +1134,7 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `qualia`.`PacelaContasAReceber` (
   `Id` INT NOT NULL AUTO_INCREMENT,
-  `Data` DATE NOT NULL,
+  `Vencimento` DATE NOT NULL,
   `ValorAReceber` DECIMAL(12,2) NOT NULL DEFAULT 0,
   `ValorRecebido` DECIMAL(12,2) NOT NULL DEFAULT 0,
   `Situacao` VARCHAR(1) NOT NULL DEFAULT 0,
@@ -1132,6 +1176,131 @@ CREATE TABLE IF NOT EXISTS `qualia`.`PagamentoContasAReceber` (
   CONSTRAINT `fk_PagamentoContasAReceber_PacelaContasAReceber1`
     FOREIGN KEY (`PacelaContasAReceberId`)
     REFERENCES `qualia`.`PacelaContasAReceber` (`Id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `qualia`.`ReajustePrecosLote`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `qualia`.`ReajustePrecosLote` (
+  `Id` INT NOT NULL AUTO_INCREMENT,
+  `DataHora` DATETIME NOT NULL DEFAULT (CURRENT_TIMESTAMP),
+  PRIMARY KEY (`Id`))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `qualia`.`ReajustePrecosLoteDetalhe`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `qualia`.`ReajustePrecosLoteDetalhe` (
+  `Id` INT NOT NULL AUTO_INCREMENT,
+  `ReajustePrecosLoteId` INT NOT NULL,
+  `ReajustePrecosId` INT NOT NULL,
+  PRIMARY KEY (`Id`),
+  INDEX `fk_ReajustePrecosLoteDetalhe_ReajustePrecosLote1_idx` (`ReajustePrecosLoteId` ASC),
+  INDEX `fk_ReajustePrecosLoteDetalhe_ReajustePrecos1_idx` (`ReajustePrecosId` ASC),
+  CONSTRAINT `fk_ReajustePrecosLoteDetalhe_ReajustePrecosLote1`
+    FOREIGN KEY (`ReajustePrecosLoteId`)
+    REFERENCES `qualia`.`ReajustePrecosLote` (`Id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_ReajustePrecosLoteDetalhe_ReajustePrecos1`
+    FOREIGN KEY (`ReajustePrecosId`)
+    REFERENCES `qualia`.`ReajustePrecos` (`Id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `qualia`.`OrcamentoCompra`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `qualia`.`OrcamentoCompra` (
+  `Id` INT NOT NULL AUTO_INCREMENT,
+  `Data` DATE NOT NULL,
+  `UsuarioId` INT NOT NULL,
+  PRIMARY KEY (`Id`),
+  INDEX `fk_OrcamentoCompra_Usuario1_idx` (`UsuarioId` ASC),
+  CONSTRAINT `fk_OrcamentoCompra_Usuario1`
+    FOREIGN KEY (`UsuarioId`)
+    REFERENCES `qualia`.`Usuario` (`Id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `qualia`.`OrcamentoCompraDetalhe`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `qualia`.`OrcamentoCompraDetalhe` (
+  `Id` INT NOT NULL AUTO_INCREMENT,
+  `OrcamentoCompraId` INT NOT NULL,
+  `ItemId` INT NOT NULL,
+  `UnidadeComercialId` INT NOT NULL,
+  PRIMARY KEY (`Id`),
+  INDEX `fk_OrcamentoCompraDetalhe_OrcamentoCompra1_idx` (`OrcamentoCompraId` ASC),
+  INDEX `fk_OrcamentoCompraDetalhe_Item1_idx` (`ItemId` ASC),
+  INDEX `fk_OrcamentoCompraDetalhe_UnidadeComercial1_idx` (`UnidadeComercialId` ASC),
+  CONSTRAINT `fk_OrcamentoCompraDetalhe_OrcamentoCompra1`
+    FOREIGN KEY (`OrcamentoCompraId`)
+    REFERENCES `qualia`.`OrcamentoCompra` (`Id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_OrcamentoCompraDetalhe_Item1`
+    FOREIGN KEY (`ItemId`)
+    REFERENCES `qualia`.`Item` (`Id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_OrcamentoCompraDetalhe_UnidadeComercial1`
+    FOREIGN KEY (`UnidadeComercialId`)
+    REFERENCES `qualia`.`UnidadeComercial` (`Id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `qualia`.`OrcamentoCompraDetalhePreco`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `qualia`.`OrcamentoCompraDetalhePreco` (
+  `Id` INT NOT NULL AUTO_INCREMENT,
+  `OrcamentoCompraDetalheId` INT NOT NULL,
+  `FornecedorId` INT NOT NULL,
+  `Preco` DECIMAL(12,2) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`Id`, `Preco`),
+  INDEX `fk_OrcamentoCompraDetalhePreco_OrcamentoCompraDetalhe1_idx` (`OrcamentoCompraDetalheId` ASC),
+  INDEX `fk_OrcamentoCompraDetalhePreco_Fornecedor1_idx` (`FornecedorId` ASC),
+  CONSTRAINT `fk_OrcamentoCompraDetalhePreco_OrcamentoCompraDetalhe1`
+    FOREIGN KEY (`OrcamentoCompraDetalheId`)
+    REFERENCES `qualia`.`OrcamentoCompraDetalhe` (`Id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_OrcamentoCompraDetalhePreco_Fornecedor1`
+    FOREIGN KEY (`FornecedorId`)
+    REFERENCES `qualia`.`Fornecedor` (`Id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `qualia`.`MovimentoContaFinanceira`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `qualia`.`MovimentoContaFinanceira` (
+  `Id` INT NOT NULL AUTO_INCREMENT,
+  `ContaFinanceiraId` INT NOT NULL,
+  `DataHora` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `SaldoAnterior` DECIMAL(12,2) NOT NULL DEFAULT 0,
+  `Entrada` DECIMAL(12,2) NOT NULL DEFAULT 0,
+  `Saida` DECIMAL(12,2) NOT NULL DEFAULT 0,
+  `Saldo` DECIMAL(12,2) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`Id`),
+  INDEX `fk_MovimentoContaFinanceira_ContaFinanceira1_idx` (`ContaFinanceiraId` ASC),
+  CONSTRAINT `fk_MovimentoContaFinanceira_ContaFinanceira1`
+    FOREIGN KEY (`ContaFinanceiraId`)
+    REFERENCES `qualia`.`ContaFinanceira` (`Id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;

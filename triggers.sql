@@ -97,5 +97,33 @@ FOR EACH ROW
     END //
 delimiter ;
 
+delimiter //
+CREATE TRIGGER before_update_MovimentoCaixa BEFORE UPDATE
+ON MovimentoCaixa
+FOR EACH ROW
+    BEGIN
+      SIGNAL SQLSTATE '45000'
+       SET MESSAGE_TEXT = 'Alteração não permitida na tabela MovimentoCaixa.';
+    END //
+delimiter ;
 
+delimiter //
+CREATE TRIGGER before_delete_MovimentoContaFinanceira BEFORE DELETE
+ON MovimentoContaFinanceira
+FOR EACH ROW
+    BEGIN
+      SIGNAL SQLSTATE '45000'
+       SET MESSAGE_TEXT = 'Exclusão não permitida na tabela MovimentoContaFinanceira.';
+    END //
+delimiter ;
+
+delimiter //
+CREATE TRIGGER before_update_MovimentoContaFinanceira BEFORE UPDATE
+ON MovimentoContaFinanceira
+FOR EACH ROW
+    BEGIN
+      SIGNAL SQLSTATE '45000'
+       SET MESSAGE_TEXT = 'Alteração não permitida na tabela MovimentoContaFinanceira.';
+    END //
+delimiter ;
 
