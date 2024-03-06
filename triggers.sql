@@ -127,3 +127,13 @@ FOR EACH ROW
     END //
 delimiter ;
 
+delimiter //
+CREATE TRIGGER before_delete_Usuario BEFORE DELETE
+ON Usuario
+FOR EACH ROW
+    BEGIN
+      SIGNAL SQLSTATE '45000'
+       SET MESSAGE_TEXT = 'Exclusão não permitida na tabela Usuario.';
+    END //
+delimiter ;
+
