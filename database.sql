@@ -163,7 +163,7 @@ CREATE TABLE IF NOT EXISTS `qualia`.`DadosEmpresa` (
   `CepId` INT NOT NULL,
   `Complemento` VARCHAR(40) NULL,
   `Numero` VARCHAR(8) NULL,
-  `Ativacao` VARCHAR(12) NULL,
+  `Ativacao` VARCHAR(35) NULL,
   `ExpiraEm` DATE NOT NULL DEFAULT (CURRENT_DATE),
   `APINFCe` TEXT NULL,
   `TokenAPINFCeHomolog` TEXT NULL,
