@@ -71,7 +71,8 @@ insert into FormaPagamentoNFe (Codigo, Descricao) VALUES ('19','Programa de fide
 insert into FormaPagamentoNFe (Codigo, Descricao) VALUES ('90','Sem pagamento');
 insert into FormaPagamentoNFe (Codigo, Descricao) VALUES ('99','Outros');
 
-insert into FormaPagamento (Descricao) VALUES ('A VISTA');
+insert into ContaFinanceira  (Descricao) VALUES ('CAIXA');
+insert into FormaPagamento (Descricao,ContaFinanceiraId) VALUES ('A VISTA',1);
 
 insert into Tributo (Descricao, 
                     AliquotaICMSConsumidor, 

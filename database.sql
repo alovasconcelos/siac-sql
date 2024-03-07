@@ -475,6 +475,7 @@ ENGINE = InnoDB;
 CREATE TABLE IF NOT EXISTS `qualia`.`ContaFinanceira` (
   `Id` INT NOT NULL AUTO_INCREMENT,
   `Descricao` VARCHAR(45) NOT NULL,
+  `Saldo` DECIMAL(12,2) NOT NULL DEFAULT 0,
   PRIMARY KEY (`Id`))
 ENGINE = InnoDB;
 
@@ -499,7 +500,7 @@ CREATE TABLE IF NOT EXISTS `qualia`.`FormaPagamento` (
   `Descricao` VARCHAR(50) NOT NULL,
   `Orcamento` TINYINT NOT NULL DEFAULT 1,
   `DisponivelEm` INT NOT NULL DEFAULT 0,
-  `ContaFinanceiraId` INT NULL,
+  `ContaFinanceiraId` INT NOT NULL,
   `TipoAcrescimo` VARCHAR(1) NOT NULL DEFAULT 'P',
   `TipoDesconto` VARCHAR(1) NOT NULL DEFAULT 'P',
   `Acrescimo` DECIMAL(12,2) NOT NULL DEFAULT 0,
@@ -749,6 +750,7 @@ CREATE TABLE IF NOT EXISTS `qualia`.`ParcelaContasAPagar` (
   `ValorAPagar` DECIMAL(12,2) NOT NULL DEFAULT 0,
   `ValorPago` DECIMAL(12,2) NOT NULL DEFAULT 0,
   `Situacao` VARCHAR(1) NOT NULL DEFAULT 0,
+  `NumeroParcela` INT NOT NULL,
   PRIMARY KEY (`Id`),
   INDEX `fk_ParcelaContasAPagar_ContasAPagar1_idx` (`ContasAPagarId` ASC),
   CONSTRAINT `fk_ParcelaContasAPagar_ContasAPagar1`
@@ -1113,9 +1115,11 @@ CREATE TABLE IF NOT EXISTS `qualia`.`ContasAReceber` (
   `DataPrimeiraParcela` DATE NULL,
   `VendaPagamentoId` INT NULL,
   `Obs` VARCHAR(255) NULL,
+  `ClienteId` INT NULL,
   PRIMARY KEY (`Id`),
   INDEX `fk_ContasAReceber_Usuario1_idx` (`UsuarioId` ASC),
   INDEX `fk_ContasAReceber_VendaPagamento1_idx` (`VendaPagamentoId` ASC),
+  INDEX `fk_ContasAReceber_Cliente1_idx` (`ClienteId` ASC),
   CONSTRAINT `fk_ContasAReceber_Usuario1`
     FOREIGN KEY (`UsuarioId`)
     REFERENCES `qualia`.`Usuario` (`Id`)
@@ -1124,6 +1128,11 @@ CREATE TABLE IF NOT EXISTS `qualia`.`ContasAReceber` (
   CONSTRAINT `fk_ContasAReceber_VendaPagamento1`
     FOREIGN KEY (`VendaPagamentoId`)
     REFERENCES `qualia`.`VendaPagamento` (`Id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_ContasAReceber_Cliente1`
+    FOREIGN KEY (`ClienteId`)
+    REFERENCES `qualia`.`Cliente` (`Id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
@@ -1139,6 +1148,7 @@ CREATE TABLE IF NOT EXISTS `qualia`.`PacelaContasAReceber` (
   `ValorRecebido` DECIMAL(12,2) NOT NULL DEFAULT 0,
   `Situacao` VARCHAR(1) NOT NULL DEFAULT 0,
   `ContasAReceberId` INT NOT NULL,
+  `NumeroParcela` INT NOT NULL,
   PRIMARY KEY (`Id`),
   INDEX `fk_PacelaContasAReceber_ContasAReceber1_idx` (`ContasAReceberId` ASC),
   CONSTRAINT `fk_PacelaContasAReceber_ContasAReceber1`
@@ -1296,11 +1306,18 @@ CREATE TABLE IF NOT EXISTS `qualia`.`MovimentoContaFinanceira` (
   `Entrada` DECIMAL(12,2) NOT NULL DEFAULT 0,
   `Saida` DECIMAL(12,2) NOT NULL DEFAULT 0,
   `Saldo` DECIMAL(12,2) NOT NULL DEFAULT 0,
+  `UsuarioId` INT NOT NULL,
   PRIMARY KEY (`Id`),
   INDEX `fk_MovimentoContaFinanceira_ContaFinanceira1_idx` (`ContaFinanceiraId` ASC),
+  INDEX `fk_MovimentoContaFinanceira_Usuario1_idx` (`UsuarioId` ASC),
   CONSTRAINT `fk_MovimentoContaFinanceira_ContaFinanceira1`
     FOREIGN KEY (`ContaFinanceiraId`)
     REFERENCES `qualia`.`ContaFinanceira` (`Id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_MovimentoContaFinanceira_Usuario1`
+    FOREIGN KEY (`UsuarioId`)
+    REFERENCES `qualia`.`Usuario` (`Id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
