@@ -475,7 +475,6 @@ ENGINE = InnoDB;
 CREATE TABLE IF NOT EXISTS `qualia`.`ContaFinanceira` (
   `Id` INT NOT NULL AUTO_INCREMENT,
   `Descricao` VARCHAR(45) NOT NULL,
-  `Saldo` DECIMAL(12,2) NOT NULL DEFAULT 0,
   PRIMARY KEY (`Id`))
 ENGINE = InnoDB;
 
@@ -553,7 +552,7 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `qualia`.`MovimentoCaixa` (
   `Id` INT NOT NULL AUTO_INCREMENT,
-  `DataHora` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `DataCaixa` DATE NOT NULL DEFAULT (CURRENT_DATE),
   `UsuarioId` INT NOT NULL,
   `SaldoAnterior` DECIMAL(12,2) NOT NULL DEFAULT 0,
   `Suprimento` DECIMAL(12,2) NOT NULL DEFAULT 0,
@@ -1139,9 +1138,9 @@ ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `qualia`.`PacelaContasAReceber`
+-- Table `qualia`.`ParcelaContasAReceber`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `qualia`.`PacelaContasAReceber` (
+CREATE TABLE IF NOT EXISTS `qualia`.`ParcelaContasAReceber` (
   `Id` INT NOT NULL AUTO_INCREMENT,
   `Vencimento` DATE NOT NULL,
   `ValorAReceber` DECIMAL(12,2) NOT NULL DEFAULT 0,
@@ -1185,7 +1184,7 @@ CREATE TABLE IF NOT EXISTS `qualia`.`PagamentoContasAReceber` (
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_PagamentoContasAReceber_PacelaContasAReceber1`
     FOREIGN KEY (`PacelaContasAReceberId`)
-    REFERENCES `qualia`.`PacelaContasAReceber` (`Id`)
+    REFERENCES `qualia`.`ParcelaContasAReceber` (`Id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
